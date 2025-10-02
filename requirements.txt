@@ -1,0 +1,5 @@
+yfinance==0.2.44
+pandas>=2.2
+pytest>=8.3
+jsonschema>=4.23
+ruff>=0.6

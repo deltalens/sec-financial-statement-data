@@ -1,0 +1,46 @@
+name: E2E smoke (real yfinance)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tickers:
+        description: "Comma-separated tickers"
+        required: true
+        default: "AAPL,MSFT"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Generate JSON (no commit)
+        run: |
+          rm -rf smoke_out && mkdir -p smoke_out
+          echo "${{ github.event.inputs.tickers }}" | tr ',' '\n' > smoke_tickers.csv
+          python scripts/build_statements.py \
+            --tickers-csv smoke_tickers.csv \
+            --out-dir smoke_out \
+            --sleep-ms 200
+      - name: Validate schema
+        run: |
+          python - <<'PY'
+          import json, glob
+          from jsonschema import validate
+          schema = json.load(open('schemas/statement.schema.json'))
+          for p in glob.glob('smoke_out/*.json'):
+              if p.endswith('index.json'): continue
+              validate(instance=json.load(open(p)), schema=schema)
+              print("Validated:", p)
+          PY
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-json
+          path: smoke_out/*.json
