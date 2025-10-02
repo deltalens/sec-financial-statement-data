@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CompanyStatements",
+  "type": "object",
+  "required": ["meta", "generated_at_utc", "statements"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["symbol"],
+      "properties": {
+        "symbol": {"type": "string"},
+        "currency": {"type": ["string", "null"]},
+        "exchange": {"type": ["string", "null"]},
+        "shortName": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "source": {"type": "string"},
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "statements": {
+      "type": "object",
+      "required": ["annual", "quarterly"],
+      "properties": {
+        "annual": {"$ref": "#/$defs/periodSet"},
+        "quarterly": {"$ref": "#/$defs/periodSet"}
+      }
+    },
+    "validations": {"type": "object"}
+  },
+  "$defs": {
+    "periodSet": {
+      "type": "object",
+      "required": ["income_statement", "balance_sheet", "cash_flow"],
+      "properties": {
+        "income_statement": {"$ref": "#/$defs/periodMap"},
+        "balance_sheet": {"$ref": "#/$defs/periodMap"},
+        "cash_flow": {"$ref": "#/$defs/periodMap"}
+      }
+    },
+    "periodMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"type": ["number", "string", "null"]}
+      }
+    }
+  },
+  "additionalProperties": false
+}
