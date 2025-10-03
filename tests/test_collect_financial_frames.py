@@ -2,7 +2,11 @@ from datetime import datetime
 
 import pandas as pd
 
-from scripts.collect_financial_frames import _normalize_statement, collect_statements
+from scripts.collect_financial_frames import (
+    _coerce_date,
+    _normalize_statement,
+    collect_statements,
+)
 
 
 def test_normalize_statement_filters_by_period():
@@ -52,3 +56,8 @@ def test_collect_statements_handles_empty(monkeypatch):
     df = collect_statements(["FOO"], start="2025-01-01", end="2025-12-31")
     assert df.empty
     assert list(df.columns) == ["ticker", "statement", "frequency", "metric", "period", "value"]
+
+
+def test_coerce_date_clamps_invalid_day():
+    assert _coerce_date("2025-06-31") == pd.Timestamp("2025-06-30")
+    assert _coerce_date("2024-02-29") == pd.Timestamp("2024-02-29")
