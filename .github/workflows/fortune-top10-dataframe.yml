@@ -5,12 +5,12 @@ on:
     inputs:
       start:
         description: Inclusive start period (YYYY-MM-DD)
-        required: true
-        default: '2025-01-01'
+        required: false
+        default: ''
       end:
         description: Inclusive end period (YYYY-MM-DD)
-        required: true
-        default: '2025-12-31'
+        required: false
+        default: ''
 
 jobs:
   build:

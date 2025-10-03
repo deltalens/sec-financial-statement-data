@@ -27,15 +27,14 @@ Generate locally:
 python scripts/build_statements.py --tickers-csv inputs/tickers.csv --out-dir data
 ```
 
-Collect the first ten Fortune 1000 + tech tickers into per-statement CSV slices
-for a given date window:
+Collect the first ten Fortune 1000 + tech tickers into a consolidated CSV for a
+given date window (leaving the optional `--start`/`--end` flags blank matches the
+workflow defaults and collects all available history):
 ```bash
 python scripts/collect_financial_frames.py \
   --tickers-csv inputs/fortune_1000_plus_tech_firms.csv \
   --limit 10 \
-  --start 2025-01-01 \
-  --end 2025-12-31 \
-  --out-dir artifacts/fortune_top10_statements
+  --out-csv artifacts/fortune_top10_statements.csv
 ```
 
 This writes six files (e.g., `income_statement_annual.csv`) into the provided
