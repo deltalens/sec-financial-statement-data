@@ -37,6 +37,9 @@ python scripts/collect_financial_frames.py \
   --out-csv artifacts/fortune_top10_statements.csv
 ```
 
+This writes six files (e.g., `income_statement_annual.csv`) into the provided
+directory so each slice can be uploaded or consumed independently.
+
 Schema validate:
 ```bash
 python - <<'PY'
