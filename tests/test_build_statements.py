@@ -55,3 +55,9 @@ def test_write_and_manifest(monkeypatch, tmp_path):
 
     changed2 = mod.write_if_changed(out / "AAPL.json", payload)
     assert not changed2
+
+
+def test_load_tickers_skips_comments(tmp_path):
+    csv = tmp_path / "fortune_1000_plus_tech_firms.csv"
+    csv.write_text("# comment\nAAPL\nMSFT\n")
+    assert mod.load_tickers(csv) == ["AAPL", "MSFT"]
