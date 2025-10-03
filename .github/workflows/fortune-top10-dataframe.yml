@@ -27,16 +27,51 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Collect statements into CSV
+      - name: Collect statements into CSV slices
         run: |
           python scripts/collect_financial_frames.py \
             --tickers-csv inputs/fortune_1000_plus_tech_firms.csv \
             --limit 10 \
             --start '${{ inputs.start }}' \
             --end '${{ inputs.end }}' \
-            --out-csv artifacts/fortune_top10_statements.csv
+            --out-dir artifacts/fortune_top10_statements
 
-      - uses: actions/upload-artifact@v4
+      - name: List generated slices
+        run: |
+          ls -al artifacts/fortune_top10_statements
+
+      - name: Upload income statement annual slice
+        uses: actions/upload-artifact@v4
         with:
-          name: fortune-top10-statements
-          path: artifacts/fortune_top10_statements.csv
+          name: fortune-top10-income-statement-annual
+          path: artifacts/fortune_top10_statements/income_statement_annual.csv
+
+      - name: Upload balance sheet annual slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortune-top10-balance-sheet-annual
+          path: artifacts/fortune_top10_statements/balance_sheet_annual.csv
+
+      - name: Upload cash flow annual slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortune-top10-cash-flow-annual
+          path: artifacts/fortune_top10_statements/cash_flow_annual.csv
+
+      - name: Upload income statement quarterly slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortune-top10-income-statement-quarterly
+          path: artifacts/fortune_top10_statements/income_statement_quarterly.csv
+
+      - name: Upload balance sheet quarterly slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortune-top10-balance-sheet-quarterly
+          path: artifacts/fortune_top10_statements/balance_sheet_quarterly.csv
+
+      - name: Upload cash flow quarterly slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortune-top10-cash-flow-quarterly
+          path: artifacts/fortune_top10_statements/cash_flow_quarterly.csv

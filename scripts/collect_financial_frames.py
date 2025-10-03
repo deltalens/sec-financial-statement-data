@@ -1,8 +1,9 @@
-"""Utilities to bundle statement data for a list of tickers into a single DataFrame.
+"""Utilities to bundle statement data for a list of tickers into CSV slices.
 
 This script mirrors the ticker loading behaviour from ``build_statements.py`` but
 shapes the yfinance payloads into a tidy ``pandas`` DataFrame.  It is designed to
-run in GitHub Actions where the resulting CSV can be uploaded as an artifact.
+run in GitHub Actions where the resulting CSV slices can be uploaded as
+artifacts.
 """
 
 from __future__ import annotations
@@ -153,7 +154,9 @@ def collect_statements(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Collect ticker statements into a CSV")
+    parser = argparse.ArgumentParser(
+        description="Collect ticker statements and emit per-slice CSV files"
+    )
     parser.add_argument("--tickers-csv", required=True, type=Path)
     parser.add_argument("--limit", type=int, default=None, help="Number of tickers to load")
     parser.add_argument(
@@ -169,17 +172,38 @@ def main() -> None:
         help="Inclusive period end (YYYY-MM-DD)",
     )
     parser.add_argument(
-        "--out-csv",
+        "--out-dir",
         type=Path,
         required=True,
-        help="Where to write the consolidated CSV",
+        help="Directory where CSV slices will be written",
     )
 
     args = parser.parse_args()
     tickers = _load_tickers(args.tickers_csv, args.limit)
     df = collect_statements(tickers, start=args.start, end=args.end)
-    args.out_csv.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(args.out_csv, index=False)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Materialize each (statement, frequency) slice into its own CSV to make
+    # downstream artifact uploads easier to target.
+    ordered_columns = ["ticker", "statement", "frequency", "metric", "period", "value"]
+    statement_frequencies = (
+        ("income_statement", "annual"),
+        ("balance_sheet", "annual"),
+        ("cash_flow", "annual"),
+        ("income_statement", "quarterly"),
+        ("balance_sheet", "quarterly"),
+        ("cash_flow", "quarterly"),
+    )
+
+    for statement, frequency in statement_frequencies:
+        slice_df = df.loc[
+            (df["statement"] == statement) & (df["frequency"] == frequency),
+            ordered_columns,
+        ].copy()
+        if not slice_df.empty:
+            slice_df = slice_df.sort_values(["ticker", "period", "metric"])  # stable order
+        out_path = args.out_dir / f"{statement}_{frequency}.csv"
+        slice_df.to_csv(out_path, index=False)
 
 
 if __name__ == "__main__":
