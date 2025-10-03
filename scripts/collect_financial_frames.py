@@ -9,6 +9,7 @@ artifacts.
 from __future__ import annotations
 
 import argparse
+import calendar
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -68,6 +69,18 @@ def _normalize_statement(
     return normalized
 
 
+def _coerce_date(date_str: str) -> pd.Timestamp:
+    """Return a Timestamp parsed from ``YYYY-MM-DD`` strings, clamping invalid days."""
+
+    timestamp = pd.to_datetime(date_str, errors="coerce")
+    if not pd.isna(timestamp):
+        return timestamp
+
+    year, month, day = (int(part) for part in date_str.split("-"))
+    _, max_day = calendar.monthrange(year, month)
+    return pd.Timestamp(year=year, month=month, day=min(day, max_day))
+
+
 def collect_statements(
     tickers: Iterable[str],
     start: str | None = None,
@@ -75,8 +88,8 @@ def collect_statements(
 ) -> pd.DataFrame:
     """Return a tidy DataFrame of statement slices for the provided tickers."""
 
-    start_ts = pd.to_datetime(start) if start else None
-    end_ts = pd.to_datetime(end) if end else None
+    start_ts = _coerce_date(start) if start else None
+    end_ts = _coerce_date(end) if end else None
 
     records: list[StatementSlice] = []
     for ticker in tickers:
