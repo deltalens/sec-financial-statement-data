@@ -8,9 +8,9 @@ run in GitHub Actions where the resulting CSV can be uploaded as an artifact.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 import yfinance as yf
@@ -156,8 +156,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Collect ticker statements into a CSV")
     parser.add_argument("--tickers-csv", required=True, type=Path)
     parser.add_argument("--limit", type=int, default=None, help="Number of tickers to load")
-    parser.add_argument("--start", type=str, default=None, help="Inclusive period start (YYYY-MM-DD)")
-    parser.add_argument("--end", type=str, default=None, help="Inclusive period end (YYYY-MM-DD)")
+    parser.add_argument(
+        "--start",
+        type=str,
+        default=None,
+        help="Inclusive period start (YYYY-MM-DD)",
+    )
+    parser.add_argument(
+        "--end",
+        type=str,
+        default=None,
+        help="Inclusive period end (YYYY-MM-DD)",
+    )
     parser.add_argument(
         "--out-csv",
         type=Path,
