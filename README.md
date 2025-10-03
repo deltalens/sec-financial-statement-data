@@ -27,6 +27,17 @@ Generate locally:
 python scripts/build_statements.py --tickers-csv inputs/tickers.csv --out-dir data
 ```
 
+Collect the first ten Fortune 1000 + tech tickers into a consolidated CSV for a
+given date window:
+```bash
+python scripts/collect_financial_frames.py \
+  --tickers-csv inputs/fortune_1000_plus_tech_firms.csv \
+  --limit 10 \
+  --start 2025-01-01 \
+  --end 2025-12-31 \
+  --out-csv artifacts/fortune_top10_statements.csv
+```
+
 Schema validate:
 ```bash
 python - <<'PY'
@@ -46,3 +57,9 @@ https://raw.githubusercontent.com/ORG/REPO/main/data/AAPL.json
 
 jsDelivr CDN:
 https://cdn.jsdelivr.net/gh/ORG/REPO@main/data/AAPL.json
+
+## GitHub Actions
+
+- **Refresh yfinance statements (sharded)** – nightly job that shards `inputs/tickers.csv`, fetches JSON payloads, and pushes any updates back to the repository.
+- **E2E smoke (real yfinance)** – manual workflow that runs the generator for an ad-hoc ticker list and uploads the JSON as an artifact.
+- **Fortune top 10 statements snapshot** – manual workflow that builds the consolidated CSV for the first ten curated tickers between the provided date range and publishes it as an artifact.
